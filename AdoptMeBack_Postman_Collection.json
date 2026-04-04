@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "AdoptMeBack API",
+    "description": "Colección de APIs para AdoptMeBack",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "base_url",
+      "value": "http://localhost:3006",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('token', response.token);",
+                  "    pm.collectionVariables.set('token', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@example.com\",\n  \"contrasena\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/login",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Obtener por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/1",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@example.com\",\n  \"contrasena\": \"123456\",\n  \"nombre_usuario\": \"juanperez\",\n  \"telefono\": \"1234567890\",\n  \"ciudad\": \"Madrid\",\n  \"tipo_vivienda\": \"Apartamento\",\n  \"tiene_patio\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo@example.com\",\n  \"ciudad\": \"Barcelona\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/1",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/1",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mascotas",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/mascotas",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mascotas"]
+            }
+          }
+        },
+        {
+          "name": "Crear mascota",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Máx\",\n  \"raza\": \"Labrador\",\n  \"edad\": \"2 años\",\n  \"tamano\": \"Grande\",\n  \"estado_salud\": \"Excelente\",\n  \"descripcion\": \"Perro muy amigable y energético\",\n  \"refugio\": \"Refugio Central\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mascotas",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mascotas"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Solicitudes",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/solicitudes",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "solicitudes"]
+            }
+          }
+        },
+        {
+          "name": "Crear solicitud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_usuario\": 1,\n  \"id_mascota\": 1,\n  \"ocupacion\": \"Ingeniero\",\n  \"edad_usuario\": 35,\n  \"motivo_adopcion\": \"Quiero un compañero en casa\",\n  \"tiene_mascotas_actuales\": \"No\",\n  \"permiso_casero\": \"Si\",\n  \"espacio_suficiente\": \"Si\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/solicitudes",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "solicitudes"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Citas",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/citas",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "citas"]
+            }
+          }
+        },
+        {
+          "name": "Crear cita",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_usuario\": 1,\n  \"id_mascota\": 1,\n  \"fecha_visita\": \"2026-04-15\",\n  \"hora_visita\": \"14:30:00\",\n  \"notas_adicionales\": \"Visitante interesado en adopción\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/citas",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "citas"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mensajes",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/mensajes",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mensajes"]
+            }
+          }
+        },
+        {
+          "name": "Crear mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_remitente\": 1,\n  \"id_destinatario\": 2,\n  \"id_mascota\": 1,\n  \"contenido\": \"Hola, estoy interesado en adoptar a esta mascota\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mensajes",
+              "protocol": "http",
+              "host": ["{{base_url}}"],
+              "path": ["api", "mensajes"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

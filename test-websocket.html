@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test WebSocket AdoptMeBack</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #764ba2;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+        
+        .log-entry.error {
+            border-left-color: #dc3545;
+            color: #dc3545;
+        }
+        
+        .log-entry.success {
+            border-left-color: #28a745;
+            color: #28a745;
+        }
+        
+        .log-entry.info {
+            border-left-color: #17a2b8;
+            color: #17a2b8;
+        }
+        
+        .log-entry.warning {
+            border-left-color: #ffc107;
+            color: #ff9800;
+        }
+        
+        .eventos-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .evento-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .evento-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LEFT SIDE: Login y Conexión -->
+        <div class="card">
+            <h2>🔐 Autenticación</h2>
+            
+            <div class="status disconnected" id="status">
+                ⚫ Desconectado
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="usuario@example.com" value="juan@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="123456" value="123456">
+            </div>
+            
+            <button onclick="login()">1. Login (obtener token)</button>
+            <button onclick="conectar()" style="margin-top: 10px;">2. Conectar WebSocket</button>
+            <button onclick="desconectar()" style="margin-top: 10px;">3. Desconectar</button>
+            
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+            
+            <h2>📡 Emitir Eventos</h2>
+            
+            <div class="form-group">
+                <label for="mensaje">Enviar Mensaje</label>
+                <textarea id="mensaje" placeholder="Escribe un mensaje..." style="height: 80px;">Hola, ¿cómo estás?</textarea>
+                <button onclick="enviarMensaje()" style="margin-top: 10px;">Enviar</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="tipo-evento">Tipo de Evento</label>
+                <select id="tipo-evento">
+                    <option value="usuario_escribiendo">Usuario Escribiendo</option>
+                    <option value="usuario_dejo_escribir">Usuario Dejó de Escribir</option>
+                    <option value="usuario_viendo_mascota">Viendo Mascota</option>
+                    <option value="mensaje_leido">Mensaje Leído</option>
+                </select>
+                <button onclick="enviarEvento()" style="margin-top: 10px;">Emitir Evento</button>
+            </div>
+        </div>
+        
+        <!-- RIGHT SIDE: Log de Eventos -->
+        <div class="card">
+            <h2>📊 Log de Eventos en Tiempo Real</h2>
+            
+            <div class="log" id="log">
+                <div class="log-entry info">Abre la consola (F12) para ver más detalles...</div>
+            </div>
+            
+            <button onclick="limpiarLog()" style="margin-top: 10px; background: #6c757d;">Limpiar Log</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.3/socket.io.global.js"></script>
+    <script>
+        let socket = null;
+        let token = null;
+        
+        // ========== UTILIDADES ==========
+        function log(mensaje, tipo = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${tipo}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${mensaje}`;
+            
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
+        }
+        
+        function actualizarEstado(conectado) {
+            const statusDiv = document.getElementById('status');
+            if (conectado) {
+                statusDiv.className = 'status connected';
+                statusDiv.textContent = '🟢 Conectado';
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.textContent = '⚫ Desconectado';
+            }
+        }
+        
+        function limpiarLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // ========== LOGIN ==========
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('Email y contraseña requeridos', 'error');
+                return;
+            }
+            
+            try {
+                log('Intentando login...', 'info');
+                
+                const response = await fetch('http://localhost:3006/api/usuarios/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        contrasena: password
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Login fallido');
+                }
+                
+                const data = await response.json();
+                token = data.token;
+                
+                log(`✅ Login exitoso. Token obtenido: ${token.substring(0, 20)}...`, 'success');
+            } catch (error) {
+                log(`❌ Error en login: ${error.message}`, 'error');
+            }
+        }
+        
+        // ========== CONEXIÓN WEBSOCKET ==========
+        function conectar() {
+            if (!token) {
+                log('❌ Primero debes hacer login', 'error');
+                return;
+            }
+            
+            if (socket && socket.connected) {
+                log('Ya estás conectado', 'warning');
+                return;
+            }
+            
+            try {
+                log('Conectando a WebSocket...', 'info');
+                
+                socket = io('http://localhost:3006', {
+                    auth: {
+                        token: token
+                    }
+                });
+                
+                // ========== EVENTOS DE CONEXIÓN ==========
+                socket.on('connect', () => {
+                    log('✅ WebSocket conectado', 'success');
+                    actualizarEstado(true);
+                });
+                
+                socket.on('disconnect', () => {
+                    log('❌ WebSocket desconectado', 'error');
+                    actualizarEstado(false);
+                });
+                
+                socket.on('error', (error) => {
+                    log(`Error WebSocket: ${error}`, 'error');
+                });
+                
+                // ========== EVENTOS DE USUARIOS ==========
+                socket.on('usuario_conectado', (data) => {
+                    log(`👤 Usuario conectado: ${data.email} (${data.usuariosConectados} online)`, 'success');
+                });
+                
+                socket.on('usuario_desconectado', (data) => {
+                    log(`👤 Usuario desconectado: ${data.email}`, 'warning');
+                });
+                
+                // ========== EVENTOS DE MENSAJES ==========
+                socket.on('nuevo_mensaje', (data) => {
+                    log(`💬 Nuevo mensaje de ${data.remitente_email}: "${data.contenido}"`, 'success');
+                });
+                
+                socket.on('usuario_escribiendo', (data) => {
+                    log(`⌨️ ${data.usuarioEmail} está escribiendo...`, 'info');
+                });
+                
+                socket.on('usuario_dejo_escribir', (data) => {
+                    log(`⌨️ ${data.usuarioEmail} dejó de escribir`, 'info');
+                });
+                
+                socket.on('mensaje_marcado_como_leido', (data) => {
+                    log(`✓ Mensaje leído por ${data.leidoPor}`, 'success');
+                });
+                
+                // ========== EVENTOS DE MASCOTAS ==========
+                socket.on('mascota_creada', (data) => {
+                    log(`🐾 Nueva mascota: ${data.nombre} (${data.raza})`, 'success');
+                });
+                
+                socket.on('mascota_actualizada', (data) => {
+                    log(`🐾 Mascota actualizada: ID ${data.id}`, 'info');
+                });
+                
+                socket.on('mascota_eliminada', (data) => {
+                    log(`🐾 Mascota eliminada: ID ${data.id}`, 'warning');
+                });
+                
+                // ========== EVENTOS DE SOLICITUDES ==========
+                socket.on('solicitud_creada', (data) => {
+                    log(`📝 Nueva solicitud: Mascota ${data.id_mascota}`, 'success');
+                });
+                
+                socket.on('solicitud_actualizada', (data) => {
+                    log(`📝 Solicitud actualizada: Estado ${data.estado}`, 'info');
+                });
+                
+                // ========== EVENTOS DE CITAS ==========
+                socket.on('cita_creada', (data) => {
+                    log(`📅 Nueva cita: ${data.fecha_visita} a las ${data.hora_visita}`, 'success');
+                });
+                
+                // ========== OTROS EVENTOS ==========
+                socket.on('usuario_viendo', (data) => {
+                    log(`👀 ${data.usuarioEmail} está viendo mascota #${data.mascotaId}`, 'info');
+                });
+                
+            } catch (error) {
+                log(`Error al conectar: ${error.message}`, 'error');
+            }
+        }
+        
+        function desconectar() {
+            if (socket) {
+                socket.disconnect();
+                log('Desconectado manualmente', 'warning');
+                actualizarEstado(false);
+            }
+        }
+        
+        // ========== EMITIR EVENTOS ==========
+        function enviarMensaje() {
+            const contenido = document.getElementById('mensaje').value;
+            
+            if (!socket || !socket.connected) {
+                log('No estás conectado', 'error');
+                return;
+            }
+            
+            if (!contenido.trim()) {
+                log('El mensaje no puede estar vacío', 'error');
+                return;
+            }
+            
+            socket.emit('mensaje', {
+                contenido: contenido
+            });
+            
+            log(`📤 Mensaje enviado: "${contenido}"`, 'success');
+            document.getElementById('mensaje').value = '';
+        }
+        
+        function enviarEvento() {
+            if (!socket || !socket.connected) {
+                log('No estás conectado', 'error');
+                return;
+            }
+            
+            const tipoEvento = document.getElementById('tipo-evento').value;
+            
+            if (tipoEvento === 'usuario_escribiendo') {
+                socket.emit('usuario_escribiendo', { tipo: 'mensaje' });
+                log('⌨️ Emitido: usuario_escribiendo', 'warning');
+            } else if (tipoEvento === 'usuario_dejo_escribir') {
+                socket.emit('usuario_dejo_escribir', {});
+                log('⌨️ Emitido: usuario_dejo_escribir', 'warning');
+            } else if (tipoEvento === 'usuario_viendo_mascota') {
+                socket.emit('usuario_viendo_mascota', { mascotaId: 1 });
+                log('👀 Emitido: usuario_viendo_mascota', 'warning');
+            } else if (tipoEvento === 'mensaje_leido') {
+                socket.emit('mensaje_leido', { idMensaje: 1 });
+                log('✓ Emitido: mensaje_leido', 'warning');
+            }
+        }
+    </script>
+</body>
+</html>
