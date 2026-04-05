@@ -14,25 +14,25 @@ const requiredEnvVars = [
 const missingVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingVars.length > 0) {
-  console.error('❌ Variables de entorno faltantes:');
+  console.error(' Variables de entorno faltantes:');
   missingVars.forEach(varName => {
     console.error(`   - ${varName}`);
   });
   console.error('\nAsegúrate de configurar todas las variables en .env');
   console.error('\nEjemplo de .env:');
-  console.error(`PORT=3006
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=adoptme
+  console.error(`PORT=3000
+DB_HOST=172.31.65.213    
+DB_USER=karla
+DB_PASSWORD=12345678
+DB_NAME=adopt-me
 JWT_SECRET=tu_secreto_super_seguro`);
   process.exit(1);
 }
 
-console.log('✅ Todas las variables de entorno están configuradas');
+console.log(' Todas las variables de entorno están configuradas');
 
 module.exports = {
-  port: process.env.PORT || 3006,
+  port: process.env.PORT || 3306,
   db: {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

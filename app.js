@@ -92,7 +92,7 @@ initializeWebSocket(server);
 
 async function startServer() {
   try {
-    console.log('🔄 Conectando a la base de datos...');
+    console.log('Conectando a la base de datos');
     console.log({
       database: config.db.database,
       user: config.db.user,
@@ -100,14 +100,14 @@ async function startServer() {
     });
 
     await sequelize.authenticate();
-    console.log('✅ Conexión a BD establecida');
+    console.log(' Conexión a BD establecida');
 
     server.listen(PORT, () => {
-      console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+      console.log(` Health check: http://localhost:${PORT}/health`);
     });
   } catch (error) {
-    console.error('❌ Error al conectar a la BD:');
+    console.error(' Error al conectar a la BD:');
     console.error('Mensaje:', error.message);
     console.error('Stack:', error.stack);
     process.exit(1);
