@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const MascotasController = require('../controllers/mascotasController');
 const { mascotaValidations, handleValidationErrors } = require('../utils/validations');
-const upload = require('../middleware/upload'); 
+const upload = require('../middlewares/upload'); 
 
 // --- RUTAS DE LECTURA ---
 router.get('/', MascotasController.obtenerMascotas);
