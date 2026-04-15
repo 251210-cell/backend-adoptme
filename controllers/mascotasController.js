@@ -3,7 +3,6 @@ const { getIO } = require('../websockets/socket');
 
 const MascotasController = {
   
-  // Mantenemos estas funciones que ya tenías
   async obtenerMascotas(req, res) {
     try {
       const mascotas = await MascotasService.obtenerMascotas();
@@ -23,29 +22,22 @@ const MascotasController = {
     }
   },
 
-  // --- NUEVA FUNCIÓN DE ESTADÍSTICAS ---
+  // --- ESTADÍSTICAS SOLO POR ESTADO ---
   async obtenerEstadisticas(req, res) {
     try {
       const mascotas = await MascotasService.obtenerMascotas();
-      
       const total = mascotas.length;
       
-      // Contar por Estado (Disponible, Adoptado)
       const porEstado = mascotas.reduce((acc, pet) => {
-        acc[pet.estado] = (acc[pet.estado] || 0) + 1;
-        return acc;
-      }, {});
-
-      // Contar por Especie (Perro, Gato, etc.)
-      const porEspecie = mascotas.reduce((acc, pet) => {
-        acc[pet.especie || 'Otros'] = (acc[pet.especie || 'Otros'] || 0) + 1;
+        // Usamos 'estado' que es lo que sí tienes en la BD
+        const key = pet.estado ? pet.estado.toLowerCase() : 'disponible';
+        acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {});
 
       res.json({
         total,
-        porEstado,
-        porEspecie
+        porEstado
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -55,7 +47,27 @@ const MascotasController = {
   async crearMascota(req, res) {
     try {
       const imagenUrl = req.file ? req.file.path : null;
-      const datosFinales = { ...req.body, imagen: imagenUrl };
+      
+      // Sacamos solo los campos que existen en tu BD
+      const { 
+        nombre, raza, edad, refugio, tamano, 
+        estado_salud, condicion_especial, descripcion, 
+        estado 
+      } = req.body;
+
+      const datosFinales = { 
+        nombre, 
+        raza, 
+        edad, 
+        refugio, 
+        tamano, 
+        estado_salud, 
+        condicion_especial, 
+        descripcion,
+        estado: estado || 'disponible', // Se guarda el estado elegido
+        imagen: imagenUrl 
+      };
+
       const nuevaMascota = await MascotasService.crearMascota(datosFinales);
       
       const io = getIO();
@@ -64,6 +76,7 @@ const MascotasController = {
       
       res.status(201).json(nuevaMascota);
     } catch (error) {
+      console.error("Error al crear:", error.message);
       res.status(500).json({ error: error.message });
     }
   },
@@ -71,7 +84,12 @@ const MascotasController = {
   async actualizarMascota(req, res) {
     try {
       const imagenUrl = req.file ? req.file.path : null;
-      const datosActualizar = imagenUrl ? { ...req.body, imagen: imagenUrl } : req.body;
+      let datosActualizar = { ...req.body };
+      
+      if (imagenUrl) {
+        datosActualizar.imagen = imagenUrl;
+      }
+
       const mascotaActualizada = await MascotasService.actualizarMascota(req.params.id, datosActualizar);
       
       if (!mascotaActualizada) return res.status(404).json({ error: 'No encontrada' });
@@ -81,6 +99,7 @@ const MascotasController = {
       
       res.json({ message: 'Mascota actualizada correctamente' });
     } catch (error) {
+      console.error("Error al actualizar:", error.message);
       res.status(500).json({ error: error.message });
     }
   },
