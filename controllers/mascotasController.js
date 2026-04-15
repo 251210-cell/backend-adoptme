@@ -22,14 +22,12 @@ const MascotasController = {
     }
   },
 
-  // --- ESTADÍSTICAS SOLO POR ESTADO ---
   async obtenerEstadisticas(req, res) {
     try {
       const mascotas = await MascotasService.obtenerMascotas();
       const total = mascotas.length;
       
       const porEstado = mascotas.reduce((acc, pet) => {
-        // Usamos 'estado' que es lo que sí tienes en la BD
         const key = pet.estado ? pet.estado.toLowerCase() : 'disponible';
         acc[key] = (acc[key] || 0) + 1;
         return acc;
@@ -48,13 +46,13 @@ const MascotasController = {
     try {
       const imagenUrl = req.file ? req.file.path : null;
       
-      // Sacamos solo los campos que existen en tu BD
       const { 
         nombre, raza, edad, refugio, tamano, 
-        estado_salud, condicion_especial, descripcion, 
-        estado 
+        estado_salud, condicion_especial, descripcion 
       } = req.body;
 
+      // ✅ MODIFICACIÓN: Forzamos el estado a 'disponible' 
+      // y aseguramos la condicion_especial
       const datosFinales = { 
         nombre, 
         raza, 
@@ -62,9 +60,9 @@ const MascotasController = {
         refugio, 
         tamano, 
         estado_salud, 
-        condicion_especial, 
+        condicion_especial: condicion_especial || 'Ninguna', 
         descripcion,
-        estado: estado || 'disponible', // Se guarda el estado elegido
+        estado: 'disponible', // <--- Ya no depende del req.body
         imagen: imagenUrl 
       };
 

@@ -1,17 +1,22 @@
-// Copia y pega esto tal cual (poniendo tus llaves de Cloudinary)
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+require('dotenv').config(); // Esto es lo que lee tu .env
 
 cloudinary.config({ 
-  cloud_name: 'tu_nombre', 
-  api_key: 'tu_api_key', 
-  api_secret: 'tu_api_secret' 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET 
 });
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: { folder: 'adoptme' }
+  params: {
+    folder: 'adoptme',
+    allowed_formats: ['jpg', 'png', 'jpeg'],
+  },
 });
 
-module.exports = multer({ storage });
+const upload = multer({ storage: storage });
+
+module.exports = upload; // Exportamos 'upload' directamente
