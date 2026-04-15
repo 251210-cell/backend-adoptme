@@ -1,6 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
 
-// Validaciones para usuarios
+// 1. Definición de Reglas de Validación
 const usuarioValidations = {
   crearUsuario: [
     body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
@@ -22,7 +22,6 @@ const usuarioValidations = {
   ]
 };
 
-// Validaciones para mascotas
 const mascotaValidations = {
   crearMascota: [
     body('nombre').isLength({ min: 2 }).withMessage('Nombre mínimo 2 caracteres'),
@@ -35,7 +34,6 @@ const mascotaValidations = {
   ]
 };
 
-// Validaciones para solicitudes
 const solicitudValidations = {
   crearSolicitud: [
     body('id_usuario').isInt().withMessage('ID usuario inválido'),
@@ -46,7 +44,6 @@ const solicitudValidations = {
   ]
 };
 
-// Validaciones para citas
 const citaValidations = {
   crearCita: [
     body('id_usuario').isInt().withMessage('ID usuario inválido'),
@@ -56,7 +53,6 @@ const citaValidations = {
   ]
 };
 
-// Validaciones para mensajes
 const mensajeValidations = {
   crearMensaje: [
     body('id_remitente').isInt().withMessage('ID remitente inválido'),
@@ -65,18 +61,23 @@ const mensajeValidations = {
   ]
 };
 
-// Middleware para manejo de errores de validación
+// 2. Middleware para procesar los resultados de las validaciones de arriba
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ 
       error: 'Datos inválidos',
-      details: errors.array().map(err => ({ field: err.param, message: err.msg }))
+      // Usamos path (estándar nuevo) o param (estándar viejo) para asegurar compatibilidad
+      details: errors.array().map(err => ({ 
+        field: err.path || err.param, 
+        message: err.msg 
+      }))
     });
   }
   next();
 };
 
+// 3. Exportación de todo el módulo
 module.exports = {
   usuarioValidations,
   mascotaValidations,
