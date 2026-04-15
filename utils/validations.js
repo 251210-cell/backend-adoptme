@@ -28,7 +28,7 @@ const mascotaValidations = {
     body('nombre').isLength({ min: 2 }).withMessage('Nombre mínimo 2 caracteres'),
     body('raza').notEmpty().withMessage('Raza requerida'),
     body('edad').notEmpty().withMessage('Edad requerida'),
-    body('tamano').isIn(['Pequeño', 'Mediano', 'Grande']).withMessage('Tamaño inválido'),
+    body('tamano').isIn(['Pequeno', 'Mediano', 'Grande']).withMessage('Tamaño inválido'),
     body('estado_salud').isLength({ min: 2 }).withMessage('Estado de salud requerido'),
     body('descripcion').isLength({ min: 10 }).withMessage('Descripción mínimo 10 caracteres'),
     body('condicion_especial').optional().isString().withMessage('Condición especial debe ser texto')
