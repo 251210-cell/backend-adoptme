@@ -1,7 +1,6 @@
 const SolicitudesRepository = require('../repositories/solicitudesRepository');
 
 const SolicitudesController = {
-  // 1. Debe llamarse exactamente obtenerSolicitudes
   async obtenerSolicitudes(req, res) {
     try {
       const solicitudes = await SolicitudesRepository.findAll();
@@ -35,12 +34,17 @@ const SolicitudesController = {
       const { id } = req.params;
       const { estado_solicitud, mascota_id } = req.body;
       
-      // Llamamos a tu nuevo repositorio que usa transacciones
+      // Validamos que lleguen los datos
+      if (!estado_solicitud) {
+          return res.status(400).json({ error: 'El estado es obligatorio' });
+      }
+
       await SolicitudesRepository.updateStatus(id, estado_solicitud, mascota_id);
       
-      res.json({ message: 'Estado de solicitud y mascota actualizado' });
+      res.json({ message: 'Estado de solicitud y mascota actualizado con éxito' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        console.error("Error en controlador:", error.message);
+        res.status(500).json({ error: error.message });
     }
   },
 
@@ -54,5 +58,4 @@ const SolicitudesController = {
   }
 };
 
-// VITAL: Si esto no está, las rutas fallan con el error de tu captura
 module.exports = SolicitudesController;

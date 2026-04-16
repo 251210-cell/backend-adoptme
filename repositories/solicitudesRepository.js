@@ -4,7 +4,6 @@ const Mascota = require('../models/mascotasModel');
 const sequelize = require('../config/db');
 
 const SolicitudesRepository = {
-    // Para listar en el Panel Admin
     async findAll() {
         try {
             return await Solicitud.findAll({
@@ -20,7 +19,6 @@ const SolicitudesRepository = {
         }
     },
 
-    // ESTA ES LA FUNCIÓN QUE TE FALTABA PARA EL FORMULARIO
     async create(data) {
         try {
             return await Solicitud.create(data);
@@ -30,24 +28,32 @@ const SolicitudesRepository = {
         }
     },
 
-    // Para Aprobar/Rechazar
     async updateStatus(id, nuevoEstado, idMascota) {
-        try {
-            // 1. Actualizar Solicitud
-            await Solicitud.update({ estado: nuevoEstado }, { where: { id } });
+        const t = await sequelize.transaction();
 
-            // 2. Intentar actualizar mascota (si falla no detiene el proceso)
+        try {
+            // 1. Actualizar la Solicitud
+            await Solicitud.update(
+                { estado_solicitud: nuevoEstado }, 
+                { where: { id }, transaction: t }
+            );
+
+            // 2. Actualizar la Mascota si tenemos el ID
             if (idMascota) {
-                try {
-                    const mEstado = nuevoEstado === 'Aprobada' ? 'Adoptado' : 'Disponible';
-                    await Mascota.update({ estado: mEstado }, { where: { id: idMascota } });
-                } catch (e) {
-                    console.error("Error visual en mascota:", e.message);
-                }
+                const mEstado = nuevoEstado.toLowerCase() === 'aprobada' ? 'Adoptado' : 'Disponible';
+                
+                await Mascota.update(
+                    { estado: mEstado }, 
+                    { where: { id: idMascota }, transaction: t }
+                );
+                console.log(`Log: Mascota ${idMascota} actualizada a ${mEstado}`);
             }
+
+            await t.commit();
             return true;
         } catch (error) {
-            console.error("Error en updateStatus:", error.message);
+            await t.rollback();
+            console.error("Error en updateStatus Repository:", error.message);
             throw error;
         }
     }
