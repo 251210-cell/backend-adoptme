@@ -7,7 +7,7 @@ const SolicitudesRepository = {
   async findAll() {
     return await Solicitud.findAll({
       include: [
-        { model: Usuario, as: 'usuario', attributes: ['nombre_completo', 'email'] },
+        { model: Usuario, as: 'usuario', attributes: ['nombre_usuario', 'email'] }, // <--- AQUÍ EL CAMBIO
         { model: Mascota, as: 'mascota', attributes: ['nombre', 'foto', 'id'] }
       ],
       order: [['id', 'DESC']]
