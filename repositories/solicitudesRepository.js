@@ -8,17 +8,26 @@ const SolicitudesRepository = {
     try {
       return await Solicitud.findAll({
         include: [
-          { model: Usuario, as: 'usuario', attributes: ['nombre_usuario', 'email'] },
-          { model: Mascota, as: 'mascota', attributes: ['nombre', 'foto', 'id'] }
+          { 
+            model: Usuario, 
+            as: 'usuario', 
+            attributes: ['nombre_usuario', 'email'] 
+          },
+          { 
+            model: Mascota, 
+            as: 'mascota', 
+            // Quitamos 'foto' porque está causando el Error 500
+            attributes: ['nombre', 'id'] 
+          }
         ],
         order: [['id', 'DESC']]
       });
     } catch (error) {
-      // ESTO NOS DIRÁ LA VERDAD EN LA TERMINAL
       console.error(" Error detallado en findAll:", error.message);
       throw error;
     }
   },
+
   async updateStatus(id, nuevoEstado, idMascota) {
     const t = await sequelize.transaction();
     try {
