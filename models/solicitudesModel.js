@@ -9,14 +9,14 @@ const Solicitud = sequelize.define('Solicitud', {
   },
   id_usuario: {
     type: DataTypes.INTEGER,
-    allowNull: false // En tu DB es NOT NULL
+    allowNull: false 
   },
   id_mascota: {
     type: DataTypes.INTEGER,
-    allowNull: false // En tu DB es NOT NULL
+    allowNull: false 
   },
   ocupacion: {
-    type: DataTypes.STRING(100) // Coincide con varchar(100)
+    type: DataTypes.STRING(100)
   },
   edad_usuario: {
     type: DataTypes.INTEGER
@@ -25,7 +25,6 @@ const Solicitud = sequelize.define('Solicitud', {
     type: DataTypes.TEXT
   },
   tiene_mascotas_actuales: {
-    // Usamos ENUM para que coincida con tu base de datos
     type: DataTypes.ENUM('Si', 'No') 
   },
   permiso_casero: {
@@ -35,17 +34,28 @@ const Solicitud = sequelize.define('Solicitud', {
     type: DataTypes.TEXT
   },
   estado: {
-    // Ajustamos los valores del ENUM según tu DESCRIBE
     type: DataTypes.ENUM('En Revisión', 'Aprobada', 'Rechazada'),
     defaultValue: 'En Revisión'
   },
   fecha_solicitud: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW // Para que AWS lo genere automáticamente
+    defaultValue: DataTypes.NOW 
   }
 }, {
   tableName: 'solicitudes',
   timestamps: false
 });
+
+// ==========================================
+// AQUÍ VAN LAS LÍNEAS NUEVAS (LAS ASOCIACIONES)
+// ==========================================
+const Usuario = require('./usuariosModel');
+const Mascota = require('./mascotasModel');
+
+// Establecemos las relaciones para poder hacer JOIN
+Solicitud.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
+Solicitud.belongsTo(Mascota, { foreignKey: 'id_mascota', as: 'mascota' });
+
+// ==========================================
 
 module.exports = Solicitud;
