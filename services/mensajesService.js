@@ -1,6 +1,11 @@
 const MensajesRepository = require('../repositories/mensajesRepository');
 
 const MensajesService = {
+  // NUEVO: Para que el admin vea solo el chat de ESTA solicitud
+  async obtenerConversacion(usuarioId, mascotaId) {
+    return await MensajesRepository.findByConversation(usuarioId, mascotaId);
+  },
+
   async obtenerMensajes() {
     return await MensajesRepository.findAll();
   },
@@ -10,6 +15,7 @@ const MensajesService = {
   },
 
   async crearMensaje(data) {
+    // Aquí puedes meter lógica de negocio, ej: validar palabras prohibidas
     return await MensajesRepository.create(data);
   },
 

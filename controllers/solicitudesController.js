@@ -1,62 +1,42 @@
-const SolicitudesRepository = require('../repositories/solicitudesRepository');
+const Solicitud = require('../models/solicitudesModel');
+const Usuario = require('../models/usuariosModel');
+const Mascota = require('../models/mascotasModel');
+const sequelize = require('../config/db');
 
-const SolicitudesController = {
-  async obtenerSolicitudes(req, res) {
+const SolicitudesRepository = {
+  // 1. Traer TODO para que el admin vea el formulario previo
+  async findAll() {
+    return await Solicitud.findAll({
+      include: [
+        { model: Usuario, as: 'usuario', attributes: ['nombre_completo', 'email'] },
+        { model: Mascota, as: 'mascota', attributes: ['nombre', 'foto'] }
+      ],
+      order: [['fecha_solicitud', 'DESC']]
+    });
+  },
+
+  // 2. El cambio de estado con lógica de negocio
+  async updateStatus(id, nuevoEstado, idMascota) {
+    const t = await sequelize.transaction();
     try {
-      const solicitudes = await SolicitudesRepository.findAll();
-      res.json(solicitudes);
+      // Actualizar Solicitud (Pendiente -> Aprobada/Rechazada)
+      await Solicitud.update({ estado: nuevoEstado }, { where: { id }, transaction: t });
+
+      // Actualizar Mascota (Si aprueba: Adoptado / Si rechaza: Disponible)
+      const animalEstado = nuevoEstado === 'Aprobada' ? 'Adoptado' : 'Disponible';
+      await Mascota.update({ estado: animalEstado }, { where: { id: idMascota }, transaction: t });
+
+      await t.commit();
+      return true;
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      await t.rollback();
+      throw error;
     }
   },
 
-  async obtenerSolicitudPorId(req, res) {
-    try {
-      const solicitud = await SolicitudesRepository.findById(req.params.id);
-      if (!solicitud) return res.status(404).json({ error: 'No encontrada' });
-      res.json(solicitud);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  async crearSolicitud(req, res) {
-    try {
-      const nueva = await SolicitudesRepository.create(req.body);
-      res.status(201).json(nueva);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  async actualizarSolicitud(req, res) {
-    try {
-      const { id } = req.params;
-      const { estado_solicitud, estado_mascota, mascota_id } = req.body;
-
-      // Llamada al repositorio con los parámetros correctos
-      await SolicitudesRepository.updateStatus(
-        id, 
-        estado_solicitud, 
-        mascota_id, 
-        estado_mascota
-      );
-
-      res.json({ message: 'Estado actualizado correctamente' });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  async eliminarSolicitud(req, res) {
-    try {
-      await SolicitudesRepository.delete(req.params.id);
-      res.json({ message: 'Eliminada' });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+  async findById(id) {
+    return await Solicitud.findByPk(id, { include: ['usuario', 'mascota'] });
   }
 };
 
-// CRÍTICO: Exportación correcta para que el router lo encuentre
-module.exports = SolicitudesController;
+module.exports = SolicitudesRepository;

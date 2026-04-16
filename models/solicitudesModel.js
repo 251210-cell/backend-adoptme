@@ -24,8 +24,8 @@ const Solicitud = sequelize.define('Solicitud', {
   permiso_casero: { type: DataTypes.TEXT },
   espacio_suficiente: { type: DataTypes.TEXT },
   estado: {
-    type: DataTypes.ENUM('En Revisión', 'Aprobada', 'Rechazada'),
-    defaultValue: 'En Revisión'
+    type: DataTypes.ENUM('Pendiente', 'Aprobada', 'Rechazada'), // Cambiado flujo
+    defaultValue: 'Pendiente'
   },
   fecha_solicitud: {
     type: DataTypes.DATE,
@@ -36,7 +36,6 @@ const Solicitud = sequelize.define('Solicitud', {
   timestamps: false
 });
 
-// ASOCIACIONES: Esto permite traer los nombres en el GET
 Solicitud.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 Solicitud.belongsTo(Mascota, { foreignKey: 'id_mascota', as: 'mascota' });
 

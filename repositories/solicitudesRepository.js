@@ -1,43 +1,36 @@
 const Solicitud = require('../models/solicitudesModel');
+const Usuario = require('../models/usuariosModel');
 const Mascota = require('../models/mascotasModel');
+const sequelize = require('../config/db');
 
 const SolicitudesRepository = {
   async findAll() {
-    return await Solicitud.findAll();
+    return await Solicitud.findAll({
+      include: [
+        { model: Usuario, as: 'usuario', attributes: ['nombre_completo', 'email'] },
+        { model: Mascota, as: 'mascota', attributes: ['nombre', 'foto', 'id'] }
+      ],
+      order: [['id', 'DESC']]
+    });
   },
 
-  async findById(id) {
-    return await Solicitud.findByPk(id);
-  },
-
-  async updateStatus(id, estadoSolicitud, idMascota, estadoMascota) {
+  async updateStatus(id, nuevoEstado, idMascota) {
+    const t = await sequelize.transaction();
     try {
-      // 1. Actualizar la solicitud: el campo en tu DB es 'estado'
-      await Solicitud.update(
-        { estado: estadoSolicitud }, 
-        { where: { id: id } }
-      );
+      // 1. Cambiamos estado de la solicitud
+      await Solicitud.update({ estado: nuevoEstado }, { where: { id }, transaction: t });
 
-      // 2. Actualizar la mascota si se proporciona el ID
-      if (idMascota) {
-        await Mascota.update(
-          { estado: estadoMascota }, 
-          { where: { id: idMascota } }
-        );
-      }
+      // 2. Cambiamos estado de la mascota
+      // Si se aprueba -> Adoptado. Si se rechaza -> Disponible.
+      const animalEstado = nuevoEstado === 'Aprobada' ? 'Adoptado' : 'Disponible';
+      await Mascota.update({ estado: animalEstado }, { where: { id: idMascota }, transaction: t });
+
+      await t.commit();
       return true;
     } catch (error) {
-      console.error("Error en updateStatus:", error);
+      await t.rollback();
       throw error;
     }
-  },
-
-  async create(data) {
-    return await Solicitud.create(data);
-  },
-
-  async delete(id) {
-    return await Solicitud.destroy({ where: { id: id } });
   }
 };
 
