@@ -8,50 +8,41 @@ const SolicitudesRepository = {
     try {
       return await Solicitud.findAll({
         include: [
-          { 
-            model: Usuario, 
-            as: 'usuario', 
-            attributes: ['nombre_usuario', 'email'] 
-          },
-          { 
-            model: Mascota, 
-            as: 'mascota', 
-            attributes: ['nombre', 'id'] 
-          }
+          { model: Usuario, as: 'usuario', attributes: ['nombre_usuario', 'email'] },
+          { model: Mascota, as: 'mascota', attributes: ['nombre', 'id'] }
         ],
         order: [['id', 'DESC']]
       });
     } catch (error) {
-      console.error("Error detallado en findAll:", error.message);
+      console.error("Error en findAll:", error.message);
       throw error;
     }
   },
 
   async updateStatus(id, nuevoEstado, idMascota) {
-    const t = await sequelize.transaction();
+    // Usamos una lógica más simple sin transacción para detectar el error rápido
     try {
-      // 1. Actualizamos la solicitud
-      // IMPORTANTE: Verifica que en tu DB la columna sea 'estado'
-      await Solicitud.update(
+      console.log(`Intentando actualizar solicitud ${id} a estado: ${nuevoEstado}`);
+      
+      // 1. Actualizar la Solicitud
+      const resultado = await Solicitud.update(
         { estado: nuevoEstado }, 
-        { where: { id }, transaction: t }
+        { where: { id: id } }
       );
 
-      // 2. Actualizamos la mascota
-      if (idMascota) {
-        const animalEstado = nuevoEstado === 'Aprobada' ? 'Adoptado' : 'Disponible';
-        await Mascota.update(
-          { estado: animalEstado }, 
-          { where: { id: idMascota }, transaction: t }
-        );
+      // 2. Intentar actualizar la Mascota (Si falla, no detendrá lo anterior)
+      try {
+        if (idMascota) {
+          const mEstado = nuevoEstado === 'Aprobada' ? 'Adoptado' : 'Disponible';
+          await Mascota.update({ estado: mEstado }, { where: { id: idMascota } });
+        }
+      } catch (errMascota) {
+        console.error("Error secundario al actualizar mascota:", errMascota.message);
       }
 
-      await t.commit();
       return true;
     } catch (error) {
-      if (t) await t.rollback();
-      // ESTE LOG ES CLAVE: Mira la terminal de AWS cuando falles
-      console.error("Error detallado en updateStatus:", error.message);
+      console.error("ERROR CRÍTICO en updateStatus:", error.message);
       throw error;
     }
   }
