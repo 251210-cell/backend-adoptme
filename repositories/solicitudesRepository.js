@@ -1,26 +1,18 @@
 const Solicitud = require('../models/solicitudesModel');
-const Usuario = require('../models/usuariosModel'); // Importante: Verifica que la ruta sea correcta
-const Mascota = require('../models/mascotasModel'); // Importante: Verifica que la ruta sea correcta
+const Usuario = require('../models/usuariosModel');
+const Mascota = require('../models/mascotasModel');
 
 const SolicitudesRepository = {
+  // Obtener todas con JOIN
   async findAll() {
-    // Aquí es donde sucede la magia del JOIN
     const solicitudes = await Solicitud.findAll({
       include: [
-        {
-          model: Usuario,
-          as: 'usuario', // Este alias debe existir en tus asociaciones
-          attributes: ['nombre_completo'] 
-        },
-        {
-          model: Mascota,
-          as: 'mascota',
-          attributes: ['nombre']
-        }
-      ]
+        { model: Usuario, as: 'usuario', attributes: ['nombre_completo'] },
+        { model: Mascota, as: 'mascota', attributes: ['nombre'] }
+      ],
+      order: [['fecha_solicitud', 'DESC']]
     });
 
-    // Mapeamos para que el Frontend reciba los nombres limpios
     return solicitudes.map(s => {
       const item = s.toJSON();
       return {
@@ -40,12 +32,20 @@ const SolicitudesRepository = {
     });
   },
 
-  async create(data) {
-    return await Solicitud.create(data);
+  // Función para Aprobar/Rechazar y cambiar estado de mascota
+  async updateStatus(id, estadoSolicitud, idMascota, estadoMascota) {
+    // 1. Actualizar Solicitud
+    await Solicitud.update({ estado: estadoSolicitud }, { where: { id } });
+    
+    // 2. Actualizar Mascota
+    if (idMascota) {
+      await Mascota.update({ estado: estadoMascota }, { where: { id: idMascota } });
+    }
+    return true;
   },
 
-  async update(id, data) {
-    return await Solicitud.update(data, { where: { id } });
+  async create(data) {
+    return await Solicitud.create(data);
   },
 
   async delete(id) {

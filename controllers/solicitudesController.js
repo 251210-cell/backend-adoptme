@@ -1,62 +1,57 @@
-const SolicitudesService = require('../services/solicitudesService');
+const SolicitudesRepository = require('../repositories/solicitudesRepository');
 
 const SolicitudesController = {
   async obtenerSolicitudes(req, res) {
     try {
-      const solicitudes = await SolicitudesService.obtenerSolicitudes();
+      const solicitudes = await SolicitudesRepository.findAll();
       res.json(solicitudes);
     } catch (error) {
-      console.error('Error en obtenerSolicitudes:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  async actualizarSolicitud(req, res) {
+    try {
+      const { id } = req.params;
+      const { estado_solicitud, estado_mascota, mascota_id } = req.body;
+
+      await SolicitudesRepository.updateStatus(
+        id, 
+        estado_solicitud, 
+        mascota_id, 
+        estado_mascota
+      );
+
+      res.json({ message: 'Estado actualizado correctamente' });
+    } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
 
   async obtenerSolicitudPorId(req, res) {
     try {
-      const solicitud = await SolicitudesService.obtenerSolicitudPorId(req.params.id);
-      if (!solicitud) {
-        return res.status(404).json({ error: 'Solicitud no encontrada' });
-      }
+      const solicitud = await SolicitudesRepository.findById(req.params.id);
+      if (!solicitud) return res.status(404).json({ error: 'No encontrada' });
       res.json(solicitud);
     } catch (error) {
-      console.error('Error en obtenerSolicitudPorId:', error);
       res.status(500).json({ error: error.message });
     }
   },
 
   async crearSolicitud(req, res) {
     try {
-      console.log('Datos recibidos:', req.body);
-      const nuevaSolicitud = await SolicitudesService.crearSolicitud(req.body);
-      res.status(201).json(nuevaSolicitud);
+      const nueva = await SolicitudesRepository.create(req.body);
+      res.status(201).json(nueva);
     } catch (error) {
-      console.error('Error en crearSolicitud:', error);
-      res.status(500).json({ error: error.message, details: error.errors || [] });
-    }
-  },
-
-  async actualizarSolicitud(req, res) {
-    try {
-      const solicitudActualizada = await SolicitudesService.actualizarSolicitud(req.params.id, req.body);
-      if (!solicitudActualizada[0]) {
-        return res.status(404).json({ error: 'Solicitud no encontrada' });
-      }
-      res.json({ message: 'Solicitud actualizada correctamente' });
-    } catch (error) {
-      console.error('Error en actualizarSolicitud:', error);
       res.status(500).json({ error: error.message });
     }
   },
 
   async eliminarSolicitud(req, res) {
     try {
-      const eliminado = await SolicitudesService.eliminarSolicitud(req.params.id);
-      if (!eliminado) {
-        return res.status(404).json({ error: 'Solicitud no encontrada' });
-      }
-      res.json({ message: 'Solicitud eliminada correctamente' });
+      await SolicitudesRepository.delete(req.params.id);
+      res.json({ message: 'Eliminada' });
     } catch (error) {
-      console.error('Error en eliminarSolicitud:', error);
       res.status(500).json({ error: error.message });
     }
   }
