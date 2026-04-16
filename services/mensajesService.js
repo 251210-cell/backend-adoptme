@@ -1,9 +1,21 @@
 const MensajesRepository = require('../repositories/mensajesRepository');
 
 const MensajesService = {
-  // NUEVO: Para que el admin vea solo el chat de ESTA solicitud
+  /**
+   * Obtiene la conversación específica entre el admin y un usuario 
+   * sobre una mascota en particular.
+   */
   async obtenerConversacion(usuarioId, mascotaId) {
     return await MensajesRepository.findByConversation(usuarioId, mascotaId);
+  },
+
+  /**
+   * Obtiene todos los mensajes donde el usuario participa
+   * (Ya sea como remitente o como destinatario)
+   */
+  async obtenerPorUsuario(usuarioId) {
+    // Usamos el repositorio para traer el historial del usuario
+    return await MensajesRepository.findByUser(usuarioId);
   },
 
   async obtenerMensajes() {
@@ -15,7 +27,10 @@ const MensajesService = {
   },
 
   async crearMensaje(data) {
-    // Aquí puedes meter lógica de negocio, ej: validar palabras prohibidas
+    // Validamos que el contenido no esté vacío antes de enviarlo al repo
+    if (!data.contenido || data.contenido.trim() === "") {
+        throw new Error("El mensaje no puede estar vacío");
+    }
     return await MensajesRepository.create(data);
   },
 

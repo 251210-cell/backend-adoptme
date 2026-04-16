@@ -33,26 +33,38 @@ const SolicitudesController = {
   },
 
   /**
-   * ACTUALIZAR SOLICITUD (Aprobar/Rechazar)
-   * Corregido para usar los campos: estado e id_mascota
+   * ACTUALIZAR SOLICITUD (Aprobar/Rechazar + Notificar vía Chat)
    */
   async actualizarSolicitud(req, res) {
     try {
       const { id } = req.params;
-      // Extraemos los nombres exactos que enviamos desde el chat-admin.js
-      const { estado, id_mascota } = req.body;
       
-      // Validación: Si no llega el campo 'estado', devolvemos error 400
+      // Recibimos todos los datos desde el chat-admin.js
+      const { 
+        estado, 
+        id_mascota, 
+        id_usuario,      // El destinatario del mensaje
+        mensaje_admin,   // El contenido del mensaje
+        id_admin_actual  // El remitente del mensaje
+      } = req.body;
+      
       if (!estado) {
           return res.status(400).json({ 
               error: 'El campo "estado" es obligatorio para actualizar.' 
           });
       }
 
-      // Llamamos al repositorio con los datos corregidos
-      await SolicitudesRepository.updateStatus(id, estado, id_mascota);
+      // Llamamos al repositorio con la nueva firma que incluye mensajería
+      await SolicitudesRepository.updateStatus(
+          id, 
+          estado, 
+          id_mascota, 
+          id_usuario, 
+          mensaje_admin, 
+          id_admin_actual
+      );
       
-      res.json({ message: 'Estado de solicitud y mascota actualizado con éxito en la base de datos' });
+      res.json({ message: 'Solicitud procesada y mensaje enviado al chat del usuario.' });
     } catch (error) {
         console.error("Error en SolicitudesController:", error.message);
         res.status(500).json({ 
