@@ -1,67 +1,62 @@
-const Solicitud = require('../models/solicitudesModel');
-const Mascota = require('../models/mascotasModel');
-const Usuario = require('../models/usuariosModel');
+const SolicitudesRepository = require('../repositories/solicitudesRepository');
 
-const SolicitudesRepository = {
-  // Obtener todas con los nombres de usuario y mascota
-  async findAll() {
+const SolicitudesController = {
+  async obtenerSolicitudes(req, res) {
     try {
-      const solicitudes = await Solicitud.findAll({
-        include: [
-          { model: Usuario, as: 'usuario', attributes: ['nombre_completo'] },
-          { model: Mascota, as: 'mascota', attributes: ['nombre'] }
-        ],
-        order: [['id', 'DESC']]
-      });
-
-      return solicitudes.map(s => {
-        const item = s.toJSON();
-        return {
-          ...item,
-          nombre_usuario: item.usuario ? item.usuario.nombre_completo : 'Invitado',
-          nombre_mascota: item.mascota ? item.mascota.nombre : 'Mascota'
-        };
-      });
+      const solicitudes = await SolicitudesRepository.findAll();
+      res.json(solicitudes);
     } catch (error) {
-      throw error;
+      res.status(500).json({ error: error.message });
     }
   },
 
-  // ESTA ES LA FUNCIÓN CRÍTICA
-  async updateStatus(id, estadoSolicitud, idMascota, estadoMascota) {
+  async obtenerSolicitudPorId(req, res) {
     try {
-      // 1. Actualizar la tabla 'solicitudes'
-      // Usamos 'estado' porque así aparece en tu DESCRIBE de MySQL
-      await Solicitud.update(
-        { estado: estadoSolicitud }, 
-        { where: { id: id } }
+      const solicitud = await SolicitudesRepository.findById(req.params.id);
+      if (!solicitud) return res.status(404).json({ error: 'No encontrada' });
+      res.json(solicitud);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  async crearSolicitud(req, res) {
+    try {
+      const nueva = await SolicitudesRepository.create(req.body);
+      res.status(201).json(nueva);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  async actualizarSolicitud(req, res) {
+    try {
+      const { id } = req.params;
+      const { estado_solicitud, estado_mascota, mascota_id } = req.body;
+
+      // Llamada al repositorio con los parámetros correctos
+      await SolicitudesRepository.updateStatus(
+        id, 
+        estado_solicitud, 
+        mascota_id, 
+        estado_mascota
       );
 
-      // 2. Actualizar la tabla 'mascotas' (poner como Adoptado)
-      if (idMascota) {
-        await Mascota.update(
-          { estado: estadoMascota }, 
-          { where: { id: idMascota } }
-        );
-      }
-      return true;
+      res.json({ message: 'Estado actualizado correctamente' });
     } catch (error) {
-      console.error("Error en Repository updateStatus:", error);
-      throw error;
+      res.status(500).json({ error: error.message });
     }
   },
 
-  async findById(id) {
-    return await Solicitud.findByPk(id);
-  },
-
-  async create(data) {
-    return await Solicitud.create(data);
-  },
-
-  async delete(id) {
-    return await Solicitud.destroy({ where: { id: id } });
+  async eliminarSolicitud(req, res) {
+    try {
+      await SolicitudesRepository.delete(req.params.id);
+      res.json({ message: 'Eliminada' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
 };
 
-module.exports = SolicitudesRepository;
+// CRÍTICO: Exportación correcta para que el router lo encuentre
+module.exports = SolicitudesController;
