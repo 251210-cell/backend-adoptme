@@ -17,11 +17,10 @@ const SolicitudesRepository = {
   async updateStatus(id, nuevoEstado, idMascota) {
     const t = await sequelize.transaction();
     try {
-      // 1. Cambiamos estado de la solicitud
+      // Actualiza la solicitud
       await Solicitud.update({ estado: nuevoEstado }, { where: { id }, transaction: t });
 
-      // 2. Cambiamos estado de la mascota
-      // Si se aprueba -> Adoptado. Si se rechaza -> Disponible.
+      // Actualiza la mascota: Si se aprueba queda 'Adoptado', si se rechaza vuelve a 'Disponible'
       const animalEstado = nuevoEstado === 'Aprobada' ? 'Adoptado' : 'Disponible';
       await Mascota.update({ estado: animalEstado }, { where: { id: idMascota }, transaction: t });
 

@@ -24,8 +24,7 @@ const Solicitud = sequelize.define('Solicitud', {
   permiso_casero: { type: DataTypes.TEXT },
   espacio_suficiente: { type: DataTypes.TEXT },
   estado: {
-    // Dejamos los 4 para que Sequelize pueda leer tus datos viejos ('En Revisión')
-    // y procesar los nuevos ('Pendiente', 'Aprobada', 'Rechazada')
+    // Aceptamos 'En Revisión' solo por compatibilidad con tus datos actuales
     type: DataTypes.ENUM('Pendiente', 'Aprobada', 'Rechazada', 'En Revisión'), 
     defaultValue: 'Pendiente'
   },
@@ -38,7 +37,7 @@ const Solicitud = sequelize.define('Solicitud', {
   timestamps: false
 });
 
-// Relaciones necesarias para que el Admin vea Nombres y Fotos
+// Asociaciones vitales para ver quién solicita y qué mascota es
 Solicitud.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 Solicitud.belongsTo(Mascota, { foreignKey: 'id_mascota', as: 'mascota' });
 
