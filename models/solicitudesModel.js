@@ -7,19 +7,42 @@ const Solicitud = sequelize.define('Solicitud', {
     primaryKey: true,
     autoIncrement: true
   },
-  id_usuario: DataTypes.INTEGER,
-  id_mascota: DataTypes.INTEGER,
-  ocupacion: DataTypes.STRING,
-  edad_usuario: DataTypes.INTEGER,
-  motivo_adopcion: DataTypes.TEXT,
-  tiene_mascotas_actuales: DataTypes.STRING,
-  permiso_casero: DataTypes.STRING,
-  espacio_suficiente: DataTypes.STRING,
-  estado: {
-    type: DataTypes.STRING,
-    defaultValue: 'PENDIENTE'
+  id_usuario: {
+    type: DataTypes.INTEGER,
+    allowNull: false // En tu DB es NOT NULL
   },
-  fecha_solicitud: DataTypes.DATE
+  id_mascota: {
+    type: DataTypes.INTEGER,
+    allowNull: false // En tu DB es NOT NULL
+  },
+  ocupacion: {
+    type: DataTypes.STRING(100) // Coincide con varchar(100)
+  },
+  edad_usuario: {
+    type: DataTypes.INTEGER
+  },
+  motivo_adopcion: {
+    type: DataTypes.TEXT
+  },
+  tiene_mascotas_actuales: {
+    // Usamos ENUM para que coincida con tu base de datos
+    type: DataTypes.ENUM('Si', 'No') 
+  },
+  permiso_casero: {
+    type: DataTypes.TEXT
+  },
+  espacio_suficiente: {
+    type: DataTypes.TEXT
+  },
+  estado: {
+    // Ajustamos los valores del ENUM según tu DESCRIBE
+    type: DataTypes.ENUM('En Revisión', 'Aprobada', 'Rechazada'),
+    defaultValue: 'En Revisión'
+  },
+  fecha_solicitud: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW // Para que AWS lo genere automáticamente
+  }
 }, {
   tableName: 'solicitudes',
   timestamps: false
