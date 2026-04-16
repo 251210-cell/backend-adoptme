@@ -55,4 +55,10 @@ const Usuario = sequelize.define('Usuario', {
   }
 });
 
+// --- ESTO ES LO QUE FALTA ---
+// Le avisamos a Usuario que puede tener muchas solicitudes
+Usuario.associate = (models) => {
+  Usuario.hasMany(models.Solicitud, { foreignKey: 'id_usuario', as: 'solicitudes' });
+};
+
 module.exports = Usuario;
