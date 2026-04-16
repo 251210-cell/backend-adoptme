@@ -5,55 +5,39 @@ const sequelize = require('../config/db');
 
 const SolicitudesRepository = {
     async findAll() {
-        try {
-            return await Solicitud.findAll({
-                include: [
-                    { model: Usuario, as: 'usuario', attributes: ['nombre_usuario', 'email'] },
-                    { model: Mascota, as: 'mascota', attributes: ['nombre', 'id'] }
-                ],
-                order: [['id', 'DESC']]
-            });
-        } catch (error) {
-            console.error("Error en findAll:", error.message);
-            throw error;
-        }
-    },
-
-    async create(data) {
-        try {
-            return await Solicitud.create(data);
-        } catch (error) {
-            console.error("Error al crear solicitud:", error.message);
-            throw error;
-        }
+        return await Solicitud.findAll({
+            include: [
+                { model: Usuario, as: 'usuario', attributes: ['nombre_usuario', 'email'] },
+                { model: Mascota, as: 'mascota', attributes: ['nombre', 'id'] }
+            ],
+            order: [['id', 'DESC']]
+        });
     },
 
     async updateStatus(id, nuevoEstado, idMascota) {
         const t = await sequelize.transaction();
-
         try {
-            // 1. Actualizar la Solicitud
+            // 1. Actualizar Solicitud (Usando el nombre exacto del modelo: 'estado')
             await Solicitud.update(
-                { estado_solicitud: nuevoEstado }, 
+                { estado: nuevoEstado }, 
                 { where: { id }, transaction: t }
             );
 
-            // 2. Actualizar la Mascota si tenemos el ID
+            // 2. Actualizar Mascota
             if (idMascota) {
                 const mEstado = nuevoEstado.toLowerCase() === 'aprobada' ? 'Adoptado' : 'Disponible';
-                
                 await Mascota.update(
                     { estado: mEstado }, 
                     { where: { id: idMascota }, transaction: t }
                 );
-                console.log(`Log: Mascota ${idMascota} actualizada a ${mEstado}`);
+                console.log(`Log: Mascota ${idMascota} ahora está ${mEstado}`);
             }
 
             await t.commit();
             return true;
         } catch (error) {
             await t.rollback();
-            console.error("Error en updateStatus Repository:", error.message);
+            console.error("Error en Repository:", error.message);
             throw error;
         }
     }
