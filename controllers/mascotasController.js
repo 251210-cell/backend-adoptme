@@ -51,8 +51,6 @@ const MascotasController = {
         estado_salud, condicion_especial, descripcion 
       } = req.body;
 
-      // ✅ MODIFICACIÓN: Forzamos el estado a 'disponible' 
-      // y aseguramos la condicion_especial
       const datosFinales = { 
         nombre, 
         raza, 
@@ -62,7 +60,7 @@ const MascotasController = {
         estado_salud, 
         condicion_especial: condicion_especial || 'Ninguna', 
         descripcion,
-        estado: 'disponible', // <--- Ya no depende del req.body
+        estado: 'disponible', 
         imagen: imagenUrl 
       };
 
@@ -76,6 +74,30 @@ const MascotasController = {
     } catch (error) {
       console.error("Error al crear:", error.message);
       res.status(500).json({ error: error.message });
+    }
+  },
+
+  // ✅ NUEVA FUNCIÓN: Resuelve el error 404 del formulario de adopción
+  async actualizarEstadoMascota(req, res) {
+    try {
+        const { id } = req.params;
+        const { estado } = req.body;
+
+        // Usamos el service para actualizar solo el campo estado
+        const actualizada = await MascotasService.actualizarMascota(id, { estado });
+        
+        if (!actualizada) {
+            return res.status(404).json({ error: 'Mascota no encontrada' });
+        }
+
+        // Avisar a otros usuarios que el perrito ya no está disponible
+        const io = getIO();
+        io.emit('mascota_actualizada', { id, cambios: { estado }, timestamp: new Date() });
+
+        res.json({ message: 'Estado de mascota actualizado correctamente' });
+    } catch (error) {
+        console.error("Error al actualizar estado:", error.message);
+        res.status(500).json({ error: error.message });
     }
   },
 

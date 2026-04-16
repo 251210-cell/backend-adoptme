@@ -29,4 +29,7 @@ router.put('/:id',
 
 router.delete('/:id', MascotasController.eliminarMascota);
 
+// El método debe ser PATCH porque eso es lo que envía tu frontend
+router.patch('/:id/estado', MascotasController.actualizarEstadoMascota);
+
 module.exports = router;
