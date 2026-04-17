@@ -1,7 +1,7 @@
 const MensajesService = require('../services/mensajesService');
 
 const MensajesController = {
-  // Obtener todos los mensajes (Uso general/Admin)
+  // Obtener todos los mensajes
   async obtenerMensajes(req, res) {
     try {
       const mensajes = await MensajesService.obtenerMensajes();
@@ -12,13 +12,17 @@ const MensajesController = {
     }
   },
 
-  
-   
+  // ESTA ES LA FUNCIÓN QUE DABA ERROR
   async obtenerMensajePorId(req, res) {
     try {
+      // 1. Extraemos el id de los parámetros de la petición (req.params)
+      const { id } = req.params; 
+      
+      // 2. Ahora sí usamos 'id' para llamar al servicio
+      // Nota: Verifica si tu servicio se llama 'obtenerPorUsuario' o 'obtenerMensajePorId'
       const mensajes = await MensajesService.obtenerPorUsuario(id);
       
-      if (!mensajes) {
+      if (!mensajes || mensajes.length === 0) {
         return res.status(404).json({ error: 'No hay mensajes para este usuario' });
       }
       res.json(mensajes);
@@ -28,12 +32,9 @@ const MensajesController = {
     }
   },
 
- 
   async crearMensaje(req, res) {
     try {
       console.log('Datos recibidos para nuevo mensaje:', req.body);
-      
-      
       const nuevoMensaje = await MensajesService.crearMensaje(req.body);
       res.status(201).json(nuevoMensaje);
     } catch (error) {
@@ -44,7 +45,8 @@ const MensajesController = {
 
   async actualizarMensaje(req, res) {
     try {
-      const mensajeActualizado = await MensajesService.actualizarMensaje(req.params.id, req.body);
+      const { id } = req.params;
+      const mensajeActualizado = await MensajesService.actualizarMensaje(id, req.body);
       if (!mensajeActualizado) {
         return res.status(404).json({ error: 'Mensaje no encontrado' });
       }
@@ -56,7 +58,8 @@ const MensajesController = {
 
   async eliminarMensaje(req, res) {
     try {
-      const eliminado = await MensajesService.eliminarMensaje(req.params.id);
+      const { id } = req.params;
+      const eliminado = await MensajesService.eliminarMensaje(id);
       if (!eliminado) {
         return res.status(404).json({ error: 'Mensaje no encontrado' });
       }
