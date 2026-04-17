@@ -2,7 +2,7 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 
 let io;
-const usuariosConectados = new Map(); // Almacenar usuarios conectados
+const usuariosConectados = new Map(); 
 
 const initializeWebSocket = (server) => {
   io = new Server(server, {
@@ -12,7 +12,7 @@ const initializeWebSocket = (server) => {
     }
   });
 
-  // ========== MIDDLEWARE DE AUTENTICACIÓN ==========
+ 
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
 
@@ -31,11 +31,11 @@ const initializeWebSocket = (server) => {
     }
   });
 
-  // ========== CONEXIÓN EXITOSA ==========
+  
   io.on('connection', (socket) => {
-    console.log(`✅ Usuario conectado: ${socket.usuarioEmail} (${socket.id})`);
+    console.log(`Usuario conectado: ${socket.usuarioEmail} (${socket.id})`);
 
-    // Almacenar usuario conectado
+   
     usuariosConectados.set(socket.id, {
       usuarioId: socket.usuarioId,
       email: socket.usuarioEmail,
@@ -43,7 +43,7 @@ const initializeWebSocket = (server) => {
       connectadoEn: new Date()
     });
 
-    // Notificar que un usuario se conectó
+    
     io.emit('usuario_conectado', {
       usuarioId: socket.usuarioId,
       email: socket.usuarioEmail,
@@ -51,9 +51,9 @@ const initializeWebSocket = (server) => {
       usuariosConectados: usuariosConectados.size
     });
 
-    // ========== MENSAJES EN TIEMPO REAL ==========
+    
     socket.on('mensaje', (data) => {
-      console.log(`💬 Mensaje de ${socket.usuarioEmail}:`, data);
+      console.log(` Mensaje de ${socket.usuarioEmail}:`, data);
       
       io.emit('nuevo_mensaje', {
         id_remitente: socket.usuarioId,
@@ -64,7 +64,7 @@ const initializeWebSocket = (server) => {
       });
     });
 
-    // ========== NOTIFICACIONES EN TIEMPO REAL ==========
+ 
     socket.on('mascota_creada', (data) => {
       console.log(`🐾 Mascota creada por ${socket.usuarioEmail}`);
       
@@ -77,7 +77,7 @@ const initializeWebSocket = (server) => {
     });
 
     socket.on('solicitud_creada', (data) => {
-      console.log(`📝 Solicitud creada por ${socket.usuarioEmail}`);
+      console.log(`Solicitud creada por ${socket.usuarioEmail}`);
       
       io.emit('notificacion_solicitud', {
         tipo: 'creada',
@@ -88,7 +88,7 @@ const initializeWebSocket = (server) => {
     });
 
     socket.on('cita_creada', (data) => {
-      console.log(`📅 Cita creada por ${socket.usuarioEmail}`);
+      console.log(`Cita creada por ${socket.usuarioEmail}`);
       
       io.emit('notificacion_cita', {
         tipo: 'creada',
@@ -99,7 +99,7 @@ const initializeWebSocket = (server) => {
     });
 
     socket.on('solicitud_actualizada', (data) => {
-      console.log(`✏️ Solicitud actualizada (estado: ${data.estado})`);
+      console.log(`Solicitud actualizada (estado: ${data.estado})`);
       
       io.emit('notificacion_solicitud_actualizada', {
         id_solicitud: data.id_solicitud,
@@ -109,15 +109,15 @@ const initializeWebSocket = (server) => {
       });
     });
 
-    // ========== TYPING INDICATORS ==========
+   
     socket.on('usuario_escribiendo', (data) => {
-      console.log(`⌨️ ${socket.usuarioEmail} está escribiendo...`);
+      console.log(`⌨${socket.usuarioEmail} está escribiendo...`);
       
-      // Enviar a todos excepto al que está escribiendo
+    
       socket.broadcast.emit('usuario_escribiendo', {
         usuarioEmail: socket.usuarioEmail,
         usuarioId: socket.usuarioId,
-        tipo: data.tipo // 'mensaje', 'comentario', etc.
+        tipo: data.tipo 
       });
     });
 
@@ -130,7 +130,7 @@ const initializeWebSocket = (server) => {
       });
     });
 
-    // ========== NOTIFICACIONES DE ACCIONES ==========
+   
     socket.on('usuario_viendo_mascota', (data) => {
       io.emit('usuario_viendo', {
         usuarioEmail: socket.usuarioEmail,
@@ -147,7 +147,7 @@ const initializeWebSocket = (server) => {
       });
     });
 
-    // ========== NOTIFICACIONES DE MENSAJES LEÍDOS ==========
+   
     socket.on('mensaje_leido', (data) => {
       io.emit('mensaje_marcado_como_leido', {
         idMensaje: data.idMensaje,
@@ -156,7 +156,7 @@ const initializeWebSocket = (server) => {
       });
     });
 
-    // ========== OBTENER USUARIOS CONECTADOS ==========
+   
     socket.on('obtener_usuarios_conectados', () => {
       const usuarios = Array.from(usuariosConectados.values()).map(u => ({
         usuarioId: u.usuarioId,
@@ -170,7 +170,7 @@ const initializeWebSocket = (server) => {
       });
     });
 
-    // ========== DESCONEXIÓN ==========
+   
     socket.on('disconnect', () => {
       console.log(`❌ Usuario desconectado: ${socket.usuarioEmail} (${socket.id})`);
 
@@ -184,13 +184,13 @@ const initializeWebSocket = (server) => {
       });
     });
 
-    // ========== MANEJO DE ERRORES ==========
+   
     socket.on('error', (error) => {
       console.error(`Error en socket ${socket.id}:`, error);
     });
   });
 
-  // Manejar errores de conexión
+  
   io.on('connect_error', (error) => {
     console.error('Error de conexión WebSocket:', error.message);
   });

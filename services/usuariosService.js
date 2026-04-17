@@ -12,17 +12,17 @@ const UsuariosService = {
   },
 
   async crearUsuario(data) {
-    // Verificar si el usuario ya existe
+    
     const usuarioExistente = await UsuariosRepository.findByEmail(data.email);
     if (usuarioExistente) {
       throw new Error('El email ya está registrado');
     }
 
-    // Hashear contraseña
+    
     const salt = await bcrypt.genSalt(10);
     const contrasenaHasheada = await bcrypt.hash(data.contrasena, salt);
 
-    // Asignar rol según dominio de correo
+    
     const emailLower = data.email.trim().toLowerCase();
     const rol = emailLower.endsWith('@adopt-me.com') ? 'admin' : 'usuario';
 
@@ -36,13 +36,13 @@ const UsuariosService = {
   },
 
   async actualizarUsuario(id, data) {
-    // Si envía contraseña nueva, hashearla
+   
     if (data.contrasena) {
       const salt = await bcrypt.genSalt(10);
       data.contrasena = await bcrypt.hash(data.contrasena, salt);
     }
 
-    // Si actualiza el email, recalcular rol por dominio
+   
     if (data.email) {
       const emailLower = data.email.trim().toLowerCase();
       data.rol = emailLower.endsWith('@adopt-me.com') ? 'admin' : 'usuario';
@@ -62,14 +62,14 @@ const UsuariosService = {
       throw new Error('Credenciales inválidas');
     }
 
-    // Comparar contraseña hasheada
+   
     const esValida = await bcrypt.compare(contrasena, usuario.contrasena);
     
     if (!esValida) {
       throw new Error('Credenciales inválidas');
     }
 
-    // Generar token JWT
+   
     const token = jwt.sign(
       { id: usuario.id, email: usuario.email, rol: usuario.rol },
       process.env.JWT_SECRET || 'tu_secret_key',

@@ -1,6 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
 
-// 1. Definición de Reglas de Validación
+
 const usuarioValidations = {
   crearUsuario: [
     body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
@@ -61,13 +61,13 @@ const mensajeValidations = {
   ]
 };
 
-// 2. Middleware para procesar los resultados de las validaciones de arriba
+
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ 
       error: 'Datos inválidos',
-      // Usamos path (estándar nuevo) o param (estándar viejo) para asegurar compatibilidad
+    
       details: errors.array().map(err => ({ 
         field: err.path || err.param, 
         message: err.msg 
@@ -77,7 +77,7 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// 3. Exportación de todo el módulo
+
 module.exports = {
   usuarioValidations,
   mascotaValidations,

@@ -5,12 +5,12 @@ const Mensaje = require('../models/mensajesModel');
 const sequelize = require('../config/db');
 
 const SolicitudesRepository = {
-    // --- NUEVA FUNCIÓN PARA CREAR (La que te faltaba) ---
+   
     async create(datos) {
         try {
-            // Ajusta los nombres de los campos según tu modelo 'Solicitud'
+           
             return await Solicitud.create({
-                id_usuario: datos.id_usuario, // Asegúrate que el frontend mande estos IDs
+                id_usuario: datos.id_usuario, 
                 id_mascota: datos.id_mascota,
                 nombre_completo: datos.nombre_completo,
                 edad: datos.edad,

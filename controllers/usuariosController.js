@@ -36,14 +36,14 @@ const UsuariosController = {
   },
 
  
- // ... otros métodos arriba (obtenerUsuarios, crearUsuario, etc.)
+
 
  async actualizarUsuario(req, res) {
   try {
-      // 1. Ejecutamos la actualización
+    
       await UsuariosService.actualizarUsuario(req.params.id, req.body);
       
-      // 2. Respondemos éxito sin validar si hubo cambios o no
+      
       res.json({ 
           message: 'Usuario actualizado correctamente',
           data: req.body 
@@ -54,7 +54,7 @@ const UsuariosController = {
   }
 },
 
-// ... otros métodos abajo (eliminarUsuario, loginUsuario)
+
 
   async eliminarUsuario(req, res) {
     try {

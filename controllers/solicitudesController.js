@@ -1,7 +1,7 @@
 const SolicitudesRepository = require('../repositories/solicitudesRepository');
 
 const SolicitudesController = {
-  // Obtener todas las solicitudes para el panel admin
+  
   async obtenerSolicitudes(req, res) {
     try {
       const solicitudes = await SolicitudesRepository.findAll();
@@ -11,7 +11,7 @@ const SolicitudesController = {
     }
   },
 
-  // Obtener una solicitud específica por su ID
+ 
   async obtenerSolicitudPorId(req, res) {
     try {
       const solicitud = await SolicitudesRepository.findById(req.params.id);
@@ -22,7 +22,7 @@ const SolicitudesController = {
     }
   },
 
-  // Crear una nueva solicitud (Desde el formulario del usuario)
+ 
   async crearSolicitud(req, res) {
     try {
       const nueva = await SolicitudesRepository.create(req.body);
@@ -32,20 +32,18 @@ const SolicitudesController = {
     }
   },
 
-  /**
-   * ACTUALIZAR SOLICITUD (Aprobar/Rechazar + Notificar vía Chat)
-   */
+ 
   async actualizarSolicitud(req, res) {
     try {
       const { id } = req.params;
       
-      // Recibimos todos los datos desde el chat-admin.js
+   
       const { 
         estado, 
         id_mascota, 
-        id_usuario,      // El destinatario del mensaje
-        mensaje_admin,   // El contenido del mensaje
-        id_admin_actual  // El remitente del mensaje
+        id_usuario,      
+        mensaje_admin,   
+        id_admin_actual  
       } = req.body;
       
       if (!estado) {
@@ -54,7 +52,7 @@ const SolicitudesController = {
           });
       }
 
-      // Llamamos al repositorio con la nueva firma que incluye mensajería
+     
       await SolicitudesRepository.updateStatus(
           id, 
           estado, 
@@ -74,7 +72,7 @@ const SolicitudesController = {
     }
   },
 
-  // Eliminar una solicitud
+ 
   async eliminarSolicitud(req, res) {
     try {
       await SolicitudesRepository.delete(req.params.id);

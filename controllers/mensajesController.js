@@ -1,7 +1,7 @@
 const MensajesService = require('../services/mensajesService');
 
 const MensajesController = {
-  // Obtener todos los mensajes (Uso general/Admin)
+
   async obtenerMensajes(req, res) {
     try {
       const mensajes = await MensajesService.obtenerMensajes();
@@ -12,15 +12,10 @@ const MensajesController = {
     }
   },
 
-  /**
-   * OBTENER MENSAJES DE UN USUARIO ESPECÍFICO
-   * Este es el que usa el chat del usuario para ver su historial
-   */
+  
+   
   async obtenerMensajePorId(req, res) {
     try {
-      const { id } = req.params; // Este 'id' es el usuarioId del localStorage
-      
-      // Llamamos al servicio para buscar la conversación
       const mensajes = await MensajesService.obtenerPorUsuario(id);
       
       if (!mensajes) {
@@ -33,12 +28,12 @@ const MensajesController = {
     }
   },
 
-  // Crear mensaje (Desde Admin o Usuario)
+ 
   async crearMensaje(req, res) {
     try {
       console.log('Datos recibidos para nuevo mensaje:', req.body);
       
-      // El body ya debe traer id_remitente, id_destinatario, id_mascota y contenido
+      
       const nuevoMensaje = await MensajesService.crearMensaje(req.body);
       res.status(201).json(nuevoMensaje);
     } catch (error) {
