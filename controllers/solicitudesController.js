@@ -11,7 +11,6 @@ const SolicitudesController = {
     }
   },
 
- 
   async obtenerSolicitudPorId(req, res) {
     try {
       const solicitud = await SolicitudesRepository.findById(req.params.id);
@@ -22,22 +21,45 @@ const SolicitudesController = {
     }
   },
 
- 
   async crearSolicitud(req, res) {
     try {
+      const { id_usuario } = req.body;
+
+      // VALIDACIÓN: Solo una adopción exitosa o una pendiente a la vez
+      const solicitudesExistentes = await SolicitudesRepository.findAll(); 
+      // Nota: Si tu repository tiene un método findByUsuario úsalo para mejor rendimiento
+      
+      const usuarioSolicitudes = solicitudesExistentes.filter(s => s.id_usuario == id_usuario);
+
+      // 1. Verificar si ya tiene una aprobada
+      const yaTieneAdopcion = usuarioSolicitudes.find(s => s.estado === 'Aprobada');
+      if (yaTieneAdopcion) {
+        return res.status(400).json({ 
+          error: 'Ya cuentas con una mascota adoptada. ¡Gracias por tu gran corazón!' 
+        });
+      }
+
+      // 2. Verificar si ya tiene una en proceso
+      const tienePendiente = usuarioSolicitudes.find(s => s.estado === 'Pendiente' || s.estado === 'En Revisión');
+      if (tienePendiente) {
+        return res.status(400).json({ 
+          error: 'Ya tienes una solicitud en proceso. Espera a que sea revisada antes de enviar otra.' 
+        });
+      }
+
+      // Si pasa las validaciones, procedemos a crear
       const nueva = await SolicitudesRepository.create(req.body);
       res.status(201).json(nueva);
     } catch (error) {
+      console.error("Error al crear solicitud:", error.message);
       res.status(500).json({ error: error.message });
     }
   },
 
- 
   async actualizarSolicitud(req, res) {
     try {
       const { id } = req.params;
       
-   
       const { 
         estado, 
         id_mascota, 
@@ -52,7 +74,6 @@ const SolicitudesController = {
           });
       }
 
-     
       await SolicitudesRepository.updateStatus(
           id, 
           estado, 
@@ -72,7 +93,6 @@ const SolicitudesController = {
     }
   },
 
- 
   async eliminarSolicitud(req, res) {
     try {
       await SolicitudesRepository.delete(req.params.id);
