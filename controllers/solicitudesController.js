@@ -26,18 +26,16 @@ const SolicitudesController = {
       const { id_usuario } = req.body;
 
       // VALIDACIÓN: Solo una adopción exitosa o una pendiente a la vez
-      const solicitudesExistentes = await SolicitudesRepository.findAll(); 
-      // Nota: Si tu repository tiene un método findByUsuario úsalo para mejor rendimiento
-      
-      const usuarioSolicitudes = solicitudesExistentes.filter(s => s.id_usuario == id_usuario);
+     // Dentro de crearSolicitud...
+const usuarioSolicitudes = solicitudesExistentes.filter(s => s.id_usuario == id_usuario);
 
-      // 1. Verificar si ya tiene una aprobada
-      const yaTieneAdopcion = usuarioSolicitudes.find(s => s.estado === 'Aprobada');
-      if (yaTieneAdopcion) {
-        return res.status(400).json({ 
-          error: 'Ya cuentas con una mascota adoptada. ¡Gracias por tu gran corazón!' 
-        });
-      }
+// ESTO BLOQUEA SI YA TIENE UNA MASCOTA (FIJO)
+const yaTieneAdopcion = usuarioSolicitudes.find(s => s.estado === 'Aprobada');
+if (yaTieneAdopcion) {
+    return res.status(400).json({ 
+        error: 'Ya cuentas con una mascota adoptada. ¡Gracias por darle un hogar!' 
+    });
+}
 
       // 2. Verificar si ya tiene una en proceso
       const tienePendiente = usuarioSolicitudes.find(s => s.estado === 'Pendiente' || s.estado === 'En Revisión');
