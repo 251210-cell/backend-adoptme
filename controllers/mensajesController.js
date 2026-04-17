@@ -1,7 +1,7 @@
 const MensajesService = require('../services/mensajesService');
 
 const MensajesController = {
-
+  // Obtener todos los mensajes (Uso general/Admin)
   async obtenerMensajes(req, res) {
     try {
       const mensajes = await MensajesService.obtenerMensajes();
