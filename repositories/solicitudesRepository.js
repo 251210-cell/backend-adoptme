@@ -8,14 +8,18 @@ const SolicitudesRepository = {
    
     async create(datos) {
         try {
-           
+            // Sequelize necesita que los nombres aquí coincidan EXACTAMENTE 
+            // con los nombres definidos en tu modelo (solicitudesModel.js)
             return await Solicitud.create({
                 id_usuario: datos.id_usuario, 
                 id_mascota: datos.id_mascota,
-                nombre_completo: datos.nombre_completo,
-                edad: datos.edad,
                 ocupacion: datos.ocupacion,
-                estado: datos.estado_solicitud || 'Pendiente',
+                edad_usuario: datos.edad_usuario || datos.edad, // Acepta ambos por si acaso
+                motivo_adopcion: datos.motivo_adopcion,
+                tiene_mascotas_actuales: datos.tiene_mascotas_actuales,
+                permiso_casero: datos.permiso_casero,
+                espacio_suficiente: datos.espacio_suficiente,
+                estado: datos.estado || 'Pendiente',
                 fecha_solicitud: new Date()
             });
         } catch (error) {
