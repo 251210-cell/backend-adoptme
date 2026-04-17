@@ -40,20 +40,17 @@ const UsuariosController = {
 
  async actualizarUsuario(req, res) {
   try {
-    // Intentamos actualizar llamando al Service
-    const resultado = await UsuariosService.actualizarUsuario(req.params.id, req.body);
-    
-    // IMPORTANTE: Quitamos el "if (!usuarioActualizado[0])" que tenías antes.
-    // Así evitamos el Error 500 si el usuario le da a guardar sin haber cambiado nada.
-    
-    res.json({ 
-      message: 'Usuario actualizado correctamente',
-      data: req.body 
-    });
+      // 1. Ejecutamos la actualización
+      await UsuariosService.actualizarUsuario(req.params.id, req.body);
+      
+      // 2. Respondemos éxito sin validar si hubo cambios o no
+      res.json({ 
+          message: 'Usuario actualizado correctamente',
+          data: req.body 
+      });
   } catch (error) {
-    console.error('Error en actualizarUsuario:', error);
-    // Enviamos el mensaje de error real para saber qué falló
-    res.status(400).json({ error: error.message });
+      console.error('Error en actualizarUsuario:', error);
+      res.status(400).json({ error: error.message });
   }
 },
 
