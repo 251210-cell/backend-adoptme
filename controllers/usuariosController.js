@@ -35,18 +35,29 @@ const UsuariosController = {
     }
   },
 
-  async actualizarUsuario(req, res) {
-    try {
-      const usuarioActualizado = await UsuariosService.actualizarUsuario(req.params.id, req.body);
-      if (!usuarioActualizado[0]) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
-      }
-      res.json({ message: 'Usuario actualizado correctamente' });
-    } catch (error) {
-      console.error('Error en actualizarUsuario:', error);
-      res.status(500).json({ error: error.message });
-    }
-  },
+ 
+ // ... otros métodos arriba (obtenerUsuarios, crearUsuario, etc.)
+
+ async actualizarUsuario(req, res) {
+  try {
+    // Intentamos actualizar llamando al Service
+    const resultado = await UsuariosService.actualizarUsuario(req.params.id, req.body);
+    
+    // IMPORTANTE: Quitamos el "if (!usuarioActualizado[0])" que tenías antes.
+    // Así evitamos el Error 500 si el usuario le da a guardar sin haber cambiado nada.
+    
+    res.json({ 
+      message: 'Usuario actualizado correctamente',
+      data: req.body 
+    });
+  } catch (error) {
+    console.error('Error en actualizarUsuario:', error);
+    // Enviamos el mensaje de error real para saber qué falló
+    res.status(400).json({ error: error.message });
+  }
+},
+
+// ... otros métodos abajo (eliminarUsuario, loginUsuario)
 
   async eliminarUsuario(req, res) {
     try {
