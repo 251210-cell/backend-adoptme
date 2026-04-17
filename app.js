@@ -15,6 +15,9 @@ const solicitudesRoutes = require('./routes/solicitudesRoutes');
 const citasRoutes = require('./routes/citasRoutes');
 const mensajesRoutes = require('./routes/mensajesRoutes');
 
+
+app.use('/api/nosotros', require('./routes/nosotrosRoutes'));
+
 // Configuración de variables de entorno
 dotenv.config();
 
