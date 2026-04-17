@@ -7,7 +7,7 @@ const Nosotros = sequelize.define('Nosotros', {
     subtitulo: { type: DataTypes.STRING, defaultValue: 'Fundación Adopt-Me' },
     parrafo1: { type: DataTypes.TEXT },
     parrafo2: { type: DataTypes.TEXT },
-    imagenIntro: { type: DataTypes.TEXT }, // URL de Cloudinary
+    imagenIntro: { type: DataTypes.TEXT }, 
     
    
     tituloObjetivo: { type: DataTypes.STRING, defaultValue: 'Nuestro Objetivo' },
@@ -19,6 +19,7 @@ const Nosotros = sequelize.define('Nosotros', {
     tituloEquipo: { type: DataTypes.STRING, defaultValue: 'Nuestro equipo' },
     miembrosEquipo: { 
         type: DataTypes.JSON, 
+        defaultValue: []
     }
 }, {
     tableName: 'nosotros_info',

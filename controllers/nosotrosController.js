@@ -1,7 +1,6 @@
 const Nosotros = require('../models/Nosotros');
 
 const NosotrosController = {
-    // Obtener datos para mostrar en la web y en el admin
     async obtenerNosotros(req, res) {
         try {
             const info = await Nosotros.findOne({ where: { id: 1 } });
@@ -11,17 +10,15 @@ const NosotrosController = {
         }
     },
 
-    // Guardar o actualizar datos
     async actualizarNosotros(req, res) {
         try {
-            // Buscamos el registro 1, si no existe lo crea, si existe lo actualiza
-            const [info, created] = await Nosotros.upsert({
+           
+            const [info] = await Nosotros.upsert({
                 id: 1,
                 ...req.body
             });
-            res.json({ message: "Información actualizada correctamente", data: info });
+            res.json({ message: "Información guardada en la nube", data: info });
         } catch (error) {
-            console.error(error);
             res.status(400).json({ error: error.message });
         }
     }

@@ -15,8 +15,15 @@ const solicitudesRoutes = require('./routes/solicitudesRoutes');
 const citasRoutes = require('./routes/citasRoutes');
 const mensajesRoutes = require('./routes/mensajesRoutes');
 
+// Importar rutas
+const nosotrosRoutes = require('./routes/nosotrosRoutes');
 
-app.use('/api/nosotros', require('./routes/nosotrosRoutes'));
+// Usar rutas
+app.use('/api/nosotros', nosotrosRoutes);
+
+// Sincronizar (Asegúrate de tener esto para que se cree la tabla en RDS)
+sequelize.sync({ alter: true });
+
 
 // Configuración de variables de entorno
 dotenv.config();
