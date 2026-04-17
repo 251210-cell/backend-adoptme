@@ -83,6 +83,21 @@ app.use((err, req, res, next) => {
       details: err.array()
     });
   }
+  // 1. Importar las rutas
+const nosotrosRoutes = require('./routes/nosotrosRoutes');
+const upload = require('./middlewares/upload'); // Ruta según tu imagen
+
+// 2. Ruta para la subida de imágenes (usada por Mascotas y Nosotros)
+app.post('/api/upload', upload.single('image'), (req, res) => {
+    if (req.file) {
+        res.json({ url: req.file.path }); // Cloudinary devuelve la URL en 'path'
+    } else {
+        res.status(400).json({ error: 'No se pudo subir la imagen' });
+    }
+});
+
+// 3. Ruta para la información de "Nosotros"
+app.use('/api/nosotros', nosotrosRoutes);
 
   // Errores generales
   res.status(err.status || 500).json({
